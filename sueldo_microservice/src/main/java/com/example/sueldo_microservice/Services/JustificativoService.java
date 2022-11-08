@@ -16,6 +16,9 @@ public class JustificativoService {
     @Autowired
     RestTemplate restTemplate;
 
+    @Autowired
+    CalculosService calculosService;
+
     public List<JustificativoModel> getAll(){
         String url = "http://justificativo-microservice/justificativo/listar";
 
@@ -28,5 +31,35 @@ public class JustificativoService {
         return Arrays.stream(records).
                 map(justificativo -> mapper.convertValue(justificativo, JustificativoModel.class))
                 .collect(Collectors.toList());
+    }
+
+    public List<JustificativoModel> getByRutAndFecha(String rut, String fecha){
+        // System.out.println("Justificativo Service: Iniciando getByRutAndFecha...");
+        // String url_base = "http://data-microservice/get-by-rut-and-fecha/";
+        String url_base = "http://localhost:8084/data/get-by-rut-and-fecha/";
+        String url_request = url_base + rut + "/" + calculosService.reformatFecha(fecha);
+        ResponseEntity<Object[]> response = restTemplate.getForEntity(url_request, Object[].class);
+        Object[] records = response.getBody();
+        if(records == null){
+            // System.out.println("Justificativo Service: getByRutAndFecha: null");
+            return null;
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        return Arrays.stream(records).
+                map(data -> mapper.convertValue(data, JustificativoModel.class))
+                .collect(Collectors.toList());
+    }
+
+    public Boolean existeJustificativo(String rut, String fecha){
+        // System.out.println("Justificativo service: existeJustificativo...");
+        List<JustificativoModel> obj = this.getByRutAndFecha(rut, fecha);
+        if(obj == null){
+            // System.out.println("Justificativo Service: existeJustificativo = null");
+            return false;
+        }
+        if(obj.size() == 1){
+            return true;
+        }
+        return false;   
     }
 }

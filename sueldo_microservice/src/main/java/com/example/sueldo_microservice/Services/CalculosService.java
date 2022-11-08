@@ -117,4 +117,14 @@ public class CalculosService {
         }
         return salida;
     }
+
+    public String reformatFecha(String fecha){
+        String[] divisiones = fecha.split("/");
+        if(divisiones.length == 1){  // Tiene formato de guión
+            String[] divisiones2 = fecha.split("-");
+            return (divisiones2[0] + "/" + divisiones2[1] + "/" + divisiones2[2]);
+        }
+        return (divisiones[0] + "-" + divisiones[1] + "-" + divisiones[2]);
+
+    }
 }

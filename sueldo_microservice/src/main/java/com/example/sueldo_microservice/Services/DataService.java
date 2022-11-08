@@ -1,7 +1,6 @@
 package com.example.sueldo_microservice.Services;
 
 import com.example.sueldo_microservice.Models.DataModel;
-import com.example.sueldo_microservice.Models.JustificativoModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +16,9 @@ public class DataService {
 
     @Autowired
     RestTemplate restTemplate;
+
+    @Autowired
+    CalculosService calculosService;
 
     public List<DataModel> getAll(){
         System.out.println("Iniciando getAll");
@@ -36,15 +38,14 @@ public class DataService {
 
     public List<DataModel> getByRutAndFecha(String rut, String fecha){
         // Solución: formatear la fecha a guiones
-        System.out.println("Iniciando getByRutAndFecha...");
+        // System.out.println("Data Service: Iniciando getByRutAndFecha...");
         // String url_base = "http://data-microservice/get-by-rut-and-fecha/";
         String url_base = "http://localhost:8084/data/get-by-rut-and-fecha/";
-        String url_request = url_base + rut + "/(" + fecha + ")";
+        String url_request = url_base + rut + "/" + calculosService.reformatFecha(fecha);
         ResponseEntity<Object[]> response = restTemplate.getForEntity(url_request, Object[].class);
         Object[] records = response.getBody();
-        System.out.println(records);
         if(records == null){
-            System.out.println("getByRutAndFecha: null");
+            // System.out.println("getByRutAndFecha: null");
             return null;
         }
         ObjectMapper mapper = new ObjectMapper();
@@ -54,14 +55,14 @@ public class DataService {
     }
     // Funciona!!
     public List<DataModel> getByRut(String rut){
-        System.out.println("Iniciando getByRut...");
+        // System.out.println("Iniciando getByRut...");
         String url_base = "http://localhost:8084/data/get-by-rut/";
         String url_request = url_base + rut;
         ResponseEntity<Object[]> response = restTemplate.getForEntity(url_request, Object[].class);
         Object[] records = response.getBody();
         System.out.println(records);
         if(records == null){
-            System.out.println("getByRut: null");
+            // System.out.println("getByRut: null");
             return null;
         }
         ObjectMapper mapper = new ObjectMapper();
@@ -72,7 +73,12 @@ public class DataService {
 
 
     public boolean asistioEmpleadoDia(String rut, String fecha){
+        // System.out.println("Data service: asistioEmpleadoDia...");
         List<DataModel> obj = this.getByRutAndFecha(rut, fecha);
+        if(obj == null){
+            // System.out.println("Data Service: asistioEmpleadoDia = null");
+            return false;
+        }
         if(obj.size() == 2){
             return true;
         }

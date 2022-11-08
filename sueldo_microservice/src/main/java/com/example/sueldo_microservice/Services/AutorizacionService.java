@@ -16,6 +16,9 @@ public class AutorizacionService {
     @Autowired
     RestTemplate restTemplate;
 
+    @Autowired
+    CalculosService calculosService;
+
     public List<AutorizacionModel> getAll(){
         String url = "http://autorizacion-microservice/autorizacion/listar";
 
@@ -28,5 +31,17 @@ public class AutorizacionService {
         return Arrays.stream(records).
                 map(autorizacion -> mapper.convertValue(autorizacion, AutorizacionModel.class))
                 .collect(Collectors.toList());
+    }
+
+    public Boolean existeAutorizacion(String rut, String fecha){
+        String url = "http://localhost:8082/get-by-rut-and-fecha/";
+        url += rut + "/" + calculosService.reformatFecha(fecha);
+        ResponseEntity<Object> response = restTemplate.getForEntity(url, Object.class);
+        Object record = response.getBody();
+        if(record == null){
+            return false;
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.convertValue(record, Boolean.class);    
     }
 }
