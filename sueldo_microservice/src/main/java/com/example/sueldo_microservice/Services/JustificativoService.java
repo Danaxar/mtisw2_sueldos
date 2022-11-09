@@ -34,27 +34,30 @@ public class JustificativoService {
     }
 
     public List<JustificativoModel> getByRutAndFecha(String rut, String fecha){
-        // System.out.println("Justificativo Service: Iniciando getByRutAndFecha...");
-        // String url_base = "http://data-microservice/get-by-rut-and-fecha/";
-        String url_base = "http://localhost:8084/data/get-by-rut-and-fecha/";
+        //System.out.println("Justificativo Service: Iniciando getByRutAndFecha...");
+        String url_base = "http://justificativo-microservice/justificativo/get-by-rut-and-fecha/";
         String url_request = url_base + rut + "/" + calculosService.reformatFecha(fecha);
+        //System.out.println("Realizando request justificativo service");
         ResponseEntity<Object[]> response = restTemplate.getForEntity(url_request, Object[].class);
+        //System.out.println("Aqui.XD");
         Object[] records = response.getBody();
+        //System.out.println(records);
         if(records == null){
-            // System.out.println("Justificativo Service: getByRutAndFecha: null");
+            //System.out.println("Justificativo Service: getByRutAndFecha: null");
             return null;
         }
         ObjectMapper mapper = new ObjectMapper();
-        return Arrays.stream(records).
-                map(data -> mapper.convertValue(data, JustificativoModel.class))
-                .collect(Collectors.toList());
+        List<JustificativoModel> x = Arrays.stream(records).map(data -> mapper.convertValue(data, JustificativoModel.class))
+        .collect(Collectors.toList());
+        
+        return x;
     }
 
     public Boolean existeJustificativo(String rut, String fecha){
-        // System.out.println("Justificativo service: existeJustificativo...");
+        //System.out.println("Justificativo service: existeJustificativo...");
         List<JustificativoModel> obj = this.getByRutAndFecha(rut, fecha);
         if(obj == null){
-            // System.out.println("Justificativo Service: existeJustificativo = null");
+            //System.out.println("Justificativo Service: existeJustificativo = null");
             return false;
         }
         if(obj.size() == 1){

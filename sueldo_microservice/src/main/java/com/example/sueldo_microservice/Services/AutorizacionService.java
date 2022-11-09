@@ -34,9 +34,12 @@ public class AutorizacionService {
     }
 
     public Boolean existeAutorizacion(String rut, String fecha){
-        String url = "http://localhost:8082/get-by-rut-and-fecha/";
+        //String url = "http://localhost:8082/autorizacion/get-by-rut-and-fecha/";
+        String url = "http://autorizacion-microservice/autorizacion/get-by-rut-and-fecha/";
         url += rut + "/" + calculosService.reformatFecha(fecha);
+        
         ResponseEntity<Object> response = restTemplate.getForEntity(url, Object.class);
+        System.out.println("Aqui.");
         Object record = response.getBody();
         if(record == null){
             return false;
