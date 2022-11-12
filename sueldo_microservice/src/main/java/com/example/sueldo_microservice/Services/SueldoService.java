@@ -106,6 +106,7 @@ public class SueldoService {
             System.out.println("Sueldo de " + 
                 empleadoActual.getNombres().split(" ")[0] + " " +
                 empleadoActual.getApellidos().split(" ")[0] + "calculado exitosamente.");
+            sueldo.printSueldo();
         }
         System.out.println("Sueldos calculados exitosamente.");
     }

@@ -3,13 +3,16 @@ package com.example.sueldo_microservice.Controllers;
 import com.example.sueldo_microservice.Services.AutorizacionService;
 import com.example.sueldo_microservice.Services.DataService;
 import com.example.sueldo_microservice.Services.SueldoService;
+import com.example.sueldo_microservice.Entities.Sueldo;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/sueldo")
@@ -43,5 +46,16 @@ public class SueldoController {
     public void calcular(){
         System.out.println("Sueldo controller: calculando sueldos...");
         sueldoService.calcularSueldos();
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<ArrayList<Sueldo>> getAll(){
+        System.out.println("Sueldo controller: obteniendo sueldos...");
+        ArrayList<Sueldo> sueldos = sueldoService.listarTodos();
+        if(sueldos.isEmpty()){
+            System.out.println("Sueldo controller: No hay sueldos calculados");
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(sueldos);
     }
 }
