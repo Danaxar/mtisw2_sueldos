@@ -78,21 +78,27 @@ public class SueldoService {
 
     public void calcularSueldos() {
         // Se debería borrar las tuplas existentes de sueldos
-        borrarTodosSueldos();
+        System.out.println("Borrando registros de tabla sueldos...");
+        sueldoRepository.deleteAll();
         mainService.agregarEmpleadosPorDefecto();
         // System.out.println("Sueldo service: Calculando sueldos...");
         ArrayList<EmpleadoEntity> empleados = empleadoService.obtenerEmpleados();
         for(int i = 0; i < empleados.size(); i++) {  // Recorrer los empleados
             EmpleadoEntity empleadoActual = empleados.get(i);
+            System.out.println("Calculando el sueldo de: " + empleadoActual.getNombres());
             Sueldo sueldo = crearSueldo(empleadoActual);
             Integer[] fechaDeTrabajo = CalculosService.copiarArray(CalculosService.fecha_actual_int);
             fechaDeTrabajo[1]--;  // Retroceder un mes = {2022, 8, 1};
             for (int j = 0; j < 30; j++) {  // Recorrer días del mes: Descuentos y Horas Extras
                 String fechaActual = CalculosService.ArrayToFecha(fechaDeTrabajo);
                 if (!dataService.asistioEmpleadoDia(empleadoActual.getRut(), fechaActual)) {  // Fue a trabajar?
+                    System.out.println("\t" + empleadoActual.getNombres() + "NO ASISTIO A TRABAJAR EL DIA   " + fechaActual);
                     // Tiene justificativo?
                     if (!justificativoService.existeJustificativo(empleadoActual.getRut(), fechaActual)){
+                        System.out.println("\t\t -> NO tiene justificativo");
                         agregarDescuento(sueldo, CalculosService.descuentoXinasistencia);  // -15%
+                    }else{
+                        System.out.println("\t\t -> tiene justificativo");
                     }
                 } else { // Asistió a trabajar
                     procesarHoraLlegada(empleadoActual, fechaActual, CalculosService.horaEntrada, sueldo);
@@ -115,10 +121,14 @@ public class SueldoService {
         // Sueldo base - descuentos por atraso/falta + bonoYearsOfService + horas extras
         Integer sueldoBase = sueldo.getSueldoFijoMensual();
         double descuentos = sueldo.getMontoDescuentos();
-        double bonoYearsOfService = sueldo.getBonoYearsOfService();
-        double montoHorasExtras = sueldo.getPagoHorasExtras();
-        double sueldoBruto = sueldoBase + bonoYearsOfService - descuentos + montoHorasExtras;
-        sueldo.setSueldoBruto(sueldoBruto);
+        if(descuentos > sueldoBase){
+            sueldo.setSueldoBruto(0);    
+        }else{
+            double bonoYearsOfService = sueldo.getBonoYearsOfService();
+            double montoHorasExtras = sueldo.getPagoHorasExtras();
+            double sueldoBruto = sueldoBase + bonoYearsOfService - descuentos + montoHorasExtras;
+            sueldo.setSueldoBruto(sueldoBruto);
+        }
     }
 
     public void sueldoFinal(Sueldo sueldo) {
@@ -152,8 +162,12 @@ public class SueldoService {
         }else if(minutosAtraso >= 45 && minutosAtraso < 70){
             agregarDescuento(sueldo, 0.06);
         }else if(minutosAtraso >= 70){ // Se considera inasistencia
-            if (!justificativoService.existeJustificativo(fecha, empleado.getRut())) {
+            System.out.println("\t" + empleado.getNombres() + " NO ASISTIO A TRABAJAR EL DIA   " + fecha);
+            if (!justificativoService.existeJustificativo(empleado.getRut(), fecha)) {
+                System.out.println("\t\t -> NO tiene justificativo");
                 agregarDescuento(sueldo, CalculosService.descuentoXinasistencia);
+            }else{
+                System.out.println("\t\t -> tiene justificativo");
             }
         }
     }
@@ -166,10 +180,14 @@ public class SueldoService {
         DataModel registro = obj.get(1); // Obtener el segundo ingreso, el de la tarde
         int minutosExtras = CalculosService.tiempoDiffToMinutos(registro.getHora(), hora_programada);
         if(minutosExtras >= 60){
-            if(autorizacionService.existeAutorizacion(fecha, empleado.getRut())){ // Agregar pago
+            System.out.println("\t" + empleado.getNombres() + "  HIZO HORAS EXTRAS EL DIA   " + fecha);
+            if(autorizacionService.existeAutorizacion(empleado.getRut(), fecha)){ // Agregar pago
+                System.out.println("\t\t -> Tiene autorizacion");
                 double montoHorasExtrasActual = sueldo.getPagoHorasExtras();  // monto acumulado
                 double pago = CategoriaEntity.horaExtraXcategoria(empleado.getCategoria()) * (minutosExtras / 60);
                 sueldo.setPagoHorasExtras(montoHorasExtrasActual + pago);
+            }else{
+                System.out.println("\t\t -> NO tiene autorizacion");
             }
         }
     }
@@ -180,8 +198,4 @@ public class SueldoService {
         sueldo.setMontoDescuentos(montoDescuentoActual + descuento);
     }
 
-    public void borrarTodosSueldos(){
-        System.out.println("Borrando registros de tabla sueldos...");
-        sueldoRepository.deleteAll();
-    }
 }

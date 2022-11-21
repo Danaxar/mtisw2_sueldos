@@ -39,9 +39,9 @@ public class AutorizacionService {
         url += rut + "/" + calculosService.reformatFecha(fecha);
         
         ResponseEntity<Object> response = restTemplate.getForEntity(url, Object.class);
-        System.out.println("Aqui.");
         Object record = response.getBody();
         if(record == null){
+            System.out.println("(sueldo) existe autorizacion, respuesta: nulo");
             return false;
         }
         ObjectMapper mapper = new ObjectMapper();

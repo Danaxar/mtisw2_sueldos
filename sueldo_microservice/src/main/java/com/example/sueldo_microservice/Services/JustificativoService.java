@@ -39,11 +39,10 @@ public class JustificativoService {
         String url_request = url_base + rut + "/" + calculosService.reformatFecha(fecha);
         //System.out.println("Realizando request justificativo service");
         ResponseEntity<Object[]> response = restTemplate.getForEntity(url_request, Object[].class);
-        //System.out.println("Aqui.XD");
         Object[] records = response.getBody();
         //System.out.println(records);
         if(records == null){
-            //System.out.println("Justificativo Service: getByRutAndFecha: null");
+            System.out.println("Justificativo Service: getByRutAndFecha: null");
             return null;
         }
         ObjectMapper mapper = new ObjectMapper();
@@ -57,12 +56,12 @@ public class JustificativoService {
         //System.out.println("Justificativo service: existeJustificativo...");
         List<JustificativoModel> obj = this.getByRutAndFecha(rut, fecha);
         if(obj == null){
-            //System.out.println("Justificativo Service: existeJustificativo = null");
+            System.out.println("Justificativo Service: existeJustificativo = null");
             return false;
         }
         if(obj.size() == 1){
             return true;
         }
-        return false;   
+        return false;
     }
 }

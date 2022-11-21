@@ -78,24 +78,6 @@ public class CalculosService {
         return fecha_actual_transformada[0] - fecha_ini_transformada[0];
     }
 
-    // Si resulta ser negativo entonces quiere decir que x es mayor que y
-    /*
-    public static Integer tiempoDiffToMinutos(String y, String x){
-        // Hora2 < Hora1
-        // y < x
-        // Hora1 - Hora2
-        Integer[] hora1 = CalculosService.horaToArray(x);
-        Integer[] hora2 = CalculosService.horaToArray(y);
-        if(hora1[1] < hora2[1]){
-            hora1[1] = hora1[1] + 60;  // Sumo a los minutos
-            hora1[0]--;  // Resto a las horas
-        }
-        int minutosDiff = hora1[1] - hora2[1];
-        int horasDiff = hora1[0] - hora2[0];
-        int minutosTotales = horasDiff * 60 + minutosDiff;
-        return minutosTotales;
-    }*/
-
     public static Integer tiempoDiffToMinutos(String x, String y){
         // x - y
         //System.out.println("\ttiempoDiffToMinutos\n\t"+x+"\n\t"+y);
